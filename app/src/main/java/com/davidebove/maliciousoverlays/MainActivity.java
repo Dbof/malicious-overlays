@@ -20,6 +20,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 1337;
     private static final int OVERLAY_WIDTH_HEIGHT = 200;
@@ -47,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             findViewById(R.id.btn_custom_toast).setEnabled(false);
         }
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Toast.makeText(this, "Note: since Android 8.0 Oreo, any overlay is TYPE_APPLICATION_OVERLAY", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -73,13 +79,20 @@ public class MainActivity extends AppCompatActivity {
                 v.setText("System");
 
                 // SYSTEM_ALERT
+                int windowType;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    windowType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                } else {
+                    windowType = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+                }
+
                 WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                        windowType,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
-                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                                FLAG_NOT_TOUCH_MODAL |
                                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                         PixelFormat.TRANSLUCENT);
@@ -105,14 +118,21 @@ public class MainActivity extends AppCompatActivity {
                 v.setBackgroundColor(Color.BLUE);
                 v.setText("Overlay");
 
-                // SYSTEM_ALERT
+                // SYSTEM_OVERLAY
+                int windowType;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    windowType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                } else {
+                    windowType = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+                }
+
                 WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                        windowType,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
-                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                                FLAG_NOT_TOUCH_MODAL |
                                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                         PixelFormat.TRANSLUCENT);
@@ -169,11 +189,18 @@ public class MainActivity extends AppCompatActivity {
                 v.setBackgroundColor(Color.YELLOW);
                 v.setText("Toast");
 
-                // SYSTEM_ALERT
+                // TYPE_TOAST
+                int windowType;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    windowType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                } else {
+                    windowType = WindowManager.LayoutParams.TYPE_TOAST;
+                }
+
                 WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_TOAST,
+                        windowType,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                         PixelFormat.TRANSLUCENT);
@@ -216,12 +243,19 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 // SYSTEM_ALERT
+                int windowType;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    windowType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                } else {
+                    windowType = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+                }
+
                 WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.MATCH_PARENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                        windowType,
                         WindowManager.LayoutParams.FLAG_SECURE |
-                                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                                FLAG_NOT_TOUCH_MODAL |
                                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                         PixelFormat.TRANSLUCENT);
                 params.gravity = Gravity.START | Gravity.TOP;
@@ -280,11 +314,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private WindowManager.LayoutParams createStandardParams() {
+        int windowType;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            windowType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            windowType = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+        }
+
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                windowType,
                 WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
                         WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH |
                         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
                         WindowManager.LayoutParams.FLAG_SECURE,
