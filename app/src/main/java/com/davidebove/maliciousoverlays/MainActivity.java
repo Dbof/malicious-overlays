@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -17,8 +18,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Random;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 
@@ -33,8 +37,10 @@ public class MainActivity extends AppCompatActivity {
     View toastView = null;
     View loginView = null;
     View holeView_1 = null, holeView_2 = null;
+    View blockerView = null;
 
     private Handler handler = new Handler();
+    private boolean rateLimitToast = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +53,36 @@ public class MainActivity extends AppCompatActivity {
         checkPermissions();
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            findViewById(R.id.btn_custom_toast).setEnabled(false);
+            findViewById(R.id.btn_custom_toast).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                            "This button does nothing since Android 8.0.\nBefore that, you could create custom windows with \"Toast\" identity and permissions.",
+                            Snackbar.LENGTH_LONG)
+                            .setDuration(15000);
+
+                    TextView tv = (TextView) snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                    tv.setMaxLines(6);
+                    snackbar.show();
+                }
+            });
         }
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Toast.makeText(this, "Note: since Android 8.0 Oreo, any overlay is TYPE_APPLICATION_OVERLAY", Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        if (toastView != null) rateLimitToast = true;
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        if (toastView != null) rateLimitToast = false;
+        super.onResume();
     }
 
     @Override
@@ -167,14 +197,24 @@ public class MainActivity extends AppCompatActivity {
                 toast.setView(toastView);
                 toast.setDuration(Toast.LENGTH_LONG);
 
+                // rotate rating of stars
+                RatingBar rating = toastView.findViewById(R.id.toast_rating);
+                if (rating != null) {
+                    int next = ((int)rating.getRating() + 1) % 6;
+                    rating.setRating(next);
+                }
+
                 if (toastView != null) {
                     toast.show();
-                    handler.postDelayed(this, 3500);
+
+                    int delayMillis = 3500;
+                    if (rateLimitToast) delayMillis = 20000;
+                    handler.postDelayed(this, delayMillis);
                 } else {
                     toast.cancel();
                 }
             }
-        }, 1000);
+        }, 500);
     }
 
     public void createCustomToast(View view) {
@@ -208,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                 params.windowAnimations = android.R.style.Animation_Toast;
                 params.x = 200;
                 params.alpha = 0.5f;
-                params.width = params.height = 100;
+                params.width = params.height = 300;
                 wm.addView(v, params);
                 toastView = v;
             }
@@ -279,8 +319,6 @@ public class MainActivity extends AppCompatActivity {
                 if (holeView_1 != null)
                     destroyHole();
 
-                Rect upper = new Rect(0, 0, -1, 350);
-                Rect bottom = new Rect(0, 0, -1, -1);
                 FillView hole_upper = new FillView(getApplicationContext());
                 FillView hole_bottom = new FillView(getApplicationContext());
 
@@ -308,6 +346,34 @@ public class MainActivity extends AppCompatActivity {
 
                 holeView_1 = hole_upper;
                 holeView_2 = hole_bottom;
+            }
+        }, 1000);
+
+    }
+
+    public void createBlocker(View v) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (blockerView != null)
+                    destroyBlocker();
+
+                FillView wholeFiller = new FillView(getApplicationContext());
+                wholeFiller.setColor(Color.argb(50, 255,255,255));
+
+                // SYSTEM_ALERT
+                WindowManager.LayoutParams params_whole = createStandardParams();
+
+                TypedValue tv = new TypedValue();
+                if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+                    params_whole.y = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+                }
+
+                params_whole.width = getResources().getDisplayMetrics().widthPixels;
+                params_whole.height = getResources().getDisplayMetrics().heightPixels;
+                wm.addView(wholeFiller, params_whole);
+
+                blockerView = wholeFiller;
             }
         }, 1000);
 
@@ -394,6 +460,13 @@ public class MainActivity extends AppCompatActivity {
             wm.removeView(holeView_2);
             holeView_1 = null;
             holeView_2 = null;
+        }
+    }
+
+    private void destroyBlocker() {
+        if (blockerView != null) {
+            wm.removeView(blockerView);
+            blockerView = null;
         }
     }
 }

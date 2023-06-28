@@ -63,6 +63,20 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_login2" />
 
     <Button
+        android:id="@+id/btn_block"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="8dp"
+        android:onClick="createBlocker"
+        android:text="Screen blocker"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_login2" />
+
+    <Button
         android:id="@+id/btn_login2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
