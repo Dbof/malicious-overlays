@@ -7,3 +7,6 @@ Note: I use this as test app to play around with overlay detection and for imple
 
 # How to build
 This project is an Android Studio (3.\*) project, so you should be able to import it directly.
+
+# Screenshot
+![Screenshot of app](overlays-toast.png)
